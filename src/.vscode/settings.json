@@ -1,0 +1,4 @@
+{
+    "npm.autoDetect": "on",
+    "debug.javascript.codelens.npmScripts": "all"
+}
