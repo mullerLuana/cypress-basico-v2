@@ -20,7 +20,7 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.get('#lastName').type('Muller')
         cy.get('#email').type('luanamull@gmail.com')
         cy.get('open-text-area').type(longtext, {delay: 0})
-        cy.get('button[type="submit"]').click()
+        cy.contains('button','Enviar').click()
 
         //verificação de resultado esperado
         cy.get('.sucess').should('be.visible')
@@ -32,13 +32,45 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.get('#lastName').type('Muller')
         cy.get('#email').type('luanamull@gmail,com')
         cy.get('open-text-area').type('Test')
-        cy.get('button[type="submit"]').click()
+        cy.contains('button','Enviar').click()
         cy.get('.error').should('be.visible')
     })
 
     //Validando telefone com valor somente númericos
-    it.only('Validação númerica do campo telefone', function(){
+    it('Validação númerica do campo telefone', function(){
         cy.get('#phone').type('abcdefgh').should('have.value','')
+    })
+
+    //Validando o campo de telefone vazio
+    it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function(){
+        cy.get('#firstName').type('Luana')
+        cy.get('#lastName').type('Muller')
+        cy.get('#email').type('luanamull@gmail.com')
+        cy.get('#phone-checkbox').click()
+        cy.get('open-text-area').type('Teste')
+        cy.contains('button','Enviar').click() 
+        cy.get('.error').should('be.visible')
+    })
+
+    it('preenche e limpa os campos nome, sobrenome, email e telefone', function(){
+        //validação de campos comparando a informação se é a mesma seguida de limpeza do input
+        cy.get('#firstName').type('Luana').should('have.value', 'Luana').clear().should('have.value','')
+        cy.get('#lasttName').type('Luana').should('have.value', 'Luana').clear().should('have.value','')
+        cy.get('#email').type('Luana').should('have.value', 'Luana').clear().should('have.value','')
+        cy.get('#phone-checkbox').type('1234567890').should('have.value', '1234567890').clear().should('have.value','')
+        cy.get('#open-text-area').type('Teste').should('have.value', 'Teste').clear().should('have.value','')
+    })
+
+    it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function(){
+       //visitando a página e clicando direto no botão sem os dados, deve apresentar a mensagem de erro
+        cy.contains('button','Enviar').click() 
+        cy.get('.error').should('be.visible')
+    })
+
+    it('envia o formuário com sucesso usando um comando customizado',function(){
+        //chamada do teste customizavel
+        cy.fillMandatoryFieldsAndSubmit()
+        cy.get('.sucess').should('be.visible')
     })
   })
 
