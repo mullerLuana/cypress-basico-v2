@@ -1,5 +1,7 @@
 /// <reference types="Cypress" />
 
+const { verify } = require("tweetnacl")
+
 //bloco describe define a suite de testes
 describe('Central de Atendimento ao Cliente TAT', function() {
     //O beforeach servirá como bloco geral para executar inicialmente antes de qualquer outra verificação
@@ -72,6 +74,33 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.fillMandatoryFieldsAndSubmit()
         cy.get('.sucess').should('be.visible')
     })
+
+    it('seleciona um produto (YouTube) por seu texto', function(){
+        cy.get('#product').select('Youtube').should('have.value', 'youtube')
+    })
+
+    it('seleciona um produto (Mentoria) por seu valor (value)', () => {
+        cy.get('#product').select('mentoria').should('have.value', 'mentoria')
+    });
+
+    it('seleciona um produto (Blog) por seu índice', () => {
+        cy.get('#product').select(1).should('have.value', 'blog') 
+    });
+
+    it('marca o tipo de atendimento "Feedback"', () => {
+        cy.get('input[type="radio"][value="feedback"]')
+            .check().should('have.value', 'feedback')
+    });
+
+    //seleção de campos radio e verificação
+    it('marca cada tipo de atendimento', () => {
+       cy.get('input[type="radio"]')
+        .should('have.length',3)
+        .each(function($radio){
+            cy.wrap($radio).check()
+            cy.wrap($radio).should('be.checked')
+        })
+    });
   })
 
  
