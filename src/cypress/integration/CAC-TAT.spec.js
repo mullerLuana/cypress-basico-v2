@@ -48,7 +48,7 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.get('#firstName').type('Luana')
         cy.get('#lastName').type('Muller')
         cy.get('#email').type('luanamull@gmail.com')
-        cy.get('#phone-checkbox').click()
+        cy.get('#phone-checkbox').check()
         cy.get('open-text-area').type('Teste')
         cy.contains('button','Enviar').click() 
         cy.get('.error').should('be.visible')
@@ -100,6 +100,50 @@ describe('Central de Atendimento ao Cliente TAT', function() {
             cy.wrap($radio).check()
             cy.wrap($radio).should('be.checked')
         })
+    });
+
+    it('marca ambos checkboxes, depois desmarca o último', () => {
+        //marcando todos os checkbox e desmarcando o último
+        cy.get('input[type="checkbox"]').check().should('be.checked')
+            .last().uncheck().should('not.be.checked')
+    });
+
+    it('seleciona um arquivo da pasta fixtures', () => {
+        cy.get('input[type="file"]').should('not.have.value')
+            .selectFile('cypress/fixtures/example.json').should(function($input){
+                expect($input[0].files[0].name).to.equal('exemplo.json')
+            //persistido no objeto de files do input se o nome do arquivo é o mesmo
+        })
+    });
+
+    it('seleciona um arquivo simulando um drag-and-drop', () => {
+        cy.get('input[type="file"]').should('not.have.value')
+            .selectFile('cypress/fixtures/example.json', {action: 'drag-drop'})
+                .should(function($input){expect($input[0].files[0].name).to.equal('example.json')
+        })
+    });
+
+    it('seleciona um arquivo utilizando uma fixture para a qual foi dada um alias', () => {
+        //usando o fixture para pegar um arquivo com um nome/alias de exemplo
+        cy.fixture('example.json').as('sampleFile')
+        cy.get('input[type="file"]').selectFile('@sampleFile')
+            .should(function($input){expect($input[0].files[0].name).to.equal('example.json')
+        })
+    });
+
+    it('verifica que a política de privacidade abre em outra aba sem a necessidade de um clique', () => {
+        //Neste caso estou verificando o direcionamento do link sem precisar clicar nele
+        cy.get('#privacy a').should('have.attr','target','_blank')        
+    });
+
+    it('acessa a página da política de privacidade removendo o target e então clicando no link', () => {
+       //o comando target serve para abrir em outra aba, aqui estamos revmovendo ele para abrir na mesma aba a outra página
+        cy.get('#privacy a').invoke('removeAttr', 'target').click()
+        cy.contains('Talking About Testing').should('be.visible')
+    });
+
+    it('testa a página da política de privacidade de forma independente', () => {
+        cy.get('#privacy a').should('have.attr','target','_blank')
     });
   })
 
