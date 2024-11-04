@@ -11,6 +11,7 @@ jobs:
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v3
-      - using: 'node20'
-        main: 'main.js'
+
+      - name: Setup Node.js enviroment
+        uses: actions/setup-node@v2.2.0
       
