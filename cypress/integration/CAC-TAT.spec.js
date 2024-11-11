@@ -4,6 +4,8 @@ const { verify } = require("tweetnacl")
 
 //bloco describe define a suite de testes
 describe('Central de Atendimento ao Cliente TAT', function() {
+    //Variavel para controle do time
+    const THREE_SECONDS_IN_MS=3000
     //O beforeach servirá como bloco geral para executar inicialmente antes de qualquer outra verificação
     beforeEach(function(){
       cy.visit('./src/index.html')
@@ -16,6 +18,10 @@ describe('Central de Atendimento ao Cliente TAT', function() {
    //Validando fluxo normal
    it('preenche os campos obrigatórios e envia o formulário', function(){
     const longtext = "Teste,Teste,Teste,Teste,Teste,Teste,Teste,Teste,Teste,Teste,Teste,Teste,"
+    
+    //congelar relogio do navegador
+    cy.clock()
+
     cy.get('#firstName').type('Luana')
     cy.get('#lastName').type('Muller')
     cy.get('#email').type('luanamull@gmail.com')
@@ -24,16 +30,27 @@ describe('Central de Atendimento ao Cliente TAT', function() {
 
     //verificação de resultado esperado
     cy.get('.success').should('be.visible')
+
+    //limpando o time bloqueado anteriormente e validando se a mensagem não é mais mostrada
+    cy.tick(THREE_SECONDS_IN_MS)
+    cy.get('.success').should('not.be.visible')
 })
 
 //Validando e-mail errado/inválido
-it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function(){
+it.only('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function(){
+   
+    cy.clock()
+
     cy.get('#firstName').type('Luana')
     cy.get('#lastName').type('Muller')
     cy.get('#email').type('luanamull@gmail,com')
     cy.get('#open-text-area').type('Test')
     cy.contains('button','Enviar').click()
+
     cy.get('.error').should('be.visible')
+
+    cy.tick(THREE_SECONDS_IN_MS)
+    cy.get('.success').should('not.be.visible')
 })
 
 //Validando telefone com valor somente númericos
@@ -41,8 +58,16 @@ it('Validação númerica do campo telefone', function(){
     cy.get('#phone').type('abcdefgh').should('have.value','')
 })
 
+//serve para validar x vezes ou mais o mesmo cenário repetidamente
+Cypress._.times(4, function(){
+    it('Campo telefone continuar vazio quando preenchido com valor não númerico', function(){
+        cy.get('#phone').type('abcdefgh').should('have.value','')
+    })
+})
+
 //Validando o campo de telefone vazio
 it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function(){
+   cy.clock()
     cy.get('#firstName').type('Luana')
     cy.get('#lastName').type('Muller')
     cy.get('#email').type('luanamull@gmail.com')
@@ -50,6 +75,9 @@ it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é p
     cy.get('#open-text-area').type('Teste')
     cy.contains('button','Enviar').click() 
     cy.get('.error').should('be.visible')
+
+    cy.tick(THREE_SECONDS_IN_MS)
+    cy.get('.success').should('not.be.visible')
 })
 
 it('preenche e limpa os campos nome, sobrenome, email e telefone', function(){
@@ -62,15 +90,23 @@ it('preenche e limpa os campos nome, sobrenome, email e telefone', function(){
 })
 
 it('exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function(){
-   //visitando a página e clicando direto no botão sem os dados, deve apresentar a mensagem de erro
+    cy.clock()
+    //visitando a página e clicando direto no botão sem os dados, deve apresentar a mensagem de erro
     cy.contains('button','Enviar').click() 
     cy.get('.error').should('be.visible')
+
+    cy.tick(THREE_SECONDS_IN_MS)
+    cy.get('.success').should('not.be.visible')
 })
 
 /*it('envia o formuário com sucesso usando um comando customizado',function(){
+    cy.clock()
     //chamada do teste customizavel
     cy.fillMandatoryFieldsAndSubmit()
     cy.get('.success').should('be.visible')
+
+    cy.tick(THREE_SECONDS_IN_MS)
+    cy.get('.success').should('not.be.visible')
 })*/
 
 it('seleciona um produto (YouTube) por seu texto', function(){
@@ -144,5 +180,16 @@ it('testa a página da política de privacidade de forma independente', () => {
     cy.get('#privacy a').should('have.attr','target','_blank')
 });
 
+it('exibe mensagem por 3 segundos', function() {
+    cy.clock() // congela o relógio do navegador
+  
+    // (...) // ação que dispara algo que exibe uma mensagem por três segundos
+  
+    // (...) // verificação de que a mensagem está visível
+  
+    cy.tick(3000) // avança o relógio três segundos (em milissegundos). Avanço este tempo para não perdê-lo esperando.
+  
+    // (...) // verificação de que a mensagem não está mais visível
+  })
 
 })
